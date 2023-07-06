@@ -8,6 +8,7 @@ import base64
 
 # Sidebar inputs
 num_simulations = st.sidebar.number_input('Number of Simulations', min_value=1000, max_value=100000, value=10000)
+num_bins = st.sidebar.number_input('Number of Bins', min_value=10, max_value=100, value=50)
 
 # User input for cost ranges
 overhead_range = st.sidebar.slider('Overhead Range ($)', min_value=2000, max_value=200000, value=(2000, 200000))
@@ -61,6 +62,7 @@ def simulate(num_simulations, overhead_range, cots_chips_range, custom_chips_ran
 def reset_data():
     # Reset all the inputs and the dataframe
     num_simulations = 10000
+    num_bins = 50
     overhead_range = (2000, 200000)
     cots_chips_range = (1000, 10000)
     custom_chips_range = (1000, 10000)
