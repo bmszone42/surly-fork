@@ -134,12 +134,25 @@ def main():
         end_time = time.time()
         st.write(f'Simulation run time: {end_time - start_time} seconds')
 
+        
+        # Display full dataframe
+        st.dataframe(df1)
+
+        # Scenario comparisons rounded to cents
+        mean_total_cost_1 = round(df1['Total Cost'].mean(), 2)
+        mean_total_cost_2 = round(df2['Total Cost'].mean(), 2)
+        st.write(f'Mean total cost for scenario 1: ${mean_total_cost_1}')
+        st.write(f'Mean total cost for scenario 2: ${mean_total_cost_2}')
+
         compare_scenarios(df1, df2)
         plot_scatter(df1)
         plot_histogram(df1)
         plot_boxplot(df1)
+        plot_correlation_heatmap(df1)
+        plot_pair_plot(df1)
+        plot_violin(df1)
         download_results(df1)
-
+        
     if st.button('Reset Simulation'):
         st.experimental_rerun()
 
