@@ -24,7 +24,7 @@ profit_margin_range = st.sidebar.slider('Profit Margin Range (%)', min_value=20,
 # Perform the simulations
 @st.cache
 def simulate(num_simulations, overhead_range, cots_chips_range, custom_chips_range, custom_chips_nre_range, custom_chips_licensing_range, ebrick_chiplets_range, ebrick_chiplets_licensing_range, osat_range, vv_tests_range, profit_margin_range):
-    df = pd.DataFrame()
+    simulation_data = []  # Create an empty list to store simulation data
     for _ in range(num_simulations):
         overhead = round(np.random.uniform(*overhead_range), -2)
         cots_chips = round(np.random.randint(1, 6) * np.random.uniform(*cots_chips_range), -2)
@@ -37,11 +37,11 @@ def simulate(num_simulations, overhead_range, cots_chips_range, custom_chips_ran
         vv_tests = round(np.random.uniform(*vv_tests_range), -2)
         cost_before_profit = round((overhead + cots_chips + custom_chips + custom_chips_nre +
                               custom_chips_licensing + ebrick_chiplets + ebrick_chiplets_licensing +
-                              osat +vv_tests), -2)
+                              osat + vv_tests), -2)
         profit = round(np.random.uniform(profit_margin_range[0]/100, profit_margin_range[1]/100) * cost_before_profit, -2)
         total_cost = round(cost_before_profit + profit, -2)
 
-        df = df.append({
+        simulation_data.append({
             'Overhead': overhead,
             'COTS Chips': cots_chips,
             'Custom Chips': custom_chips,
@@ -53,7 +53,9 @@ def simulate(num_simulations, overhead_range, cots_chips_range, custom_chips_ran
             'V&V Tests': vv_tests,
             'Profit': profit,
             'Total Cost': total_cost
-        }, ignore_index=True)
+        })
+
+    df = pd.DataFrame(simulation_data)
     return df
 
 df = simulate(num_simulations, overhead_range, cots_chips_range, custom_chips_range, custom_chips_nre_range, custom_chips_licensing_range, ebrick_chiplets_range, ebrick_chiplets_licensing_range, osat_range, vv_tests_range, profit_margin_range)
