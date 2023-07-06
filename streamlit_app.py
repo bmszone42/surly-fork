@@ -33,7 +33,7 @@ def simulate(num_simulations, overhead_range, cots_chips_range, custom_chips_ran
         custom_chips_licensing = round(np.random.uniform(*custom_chips_licensing_range), -2)
         ebrick_chiplets = round(np.random.choice(np.arange(16, 257, 16)) * np.random.uniform(*ebrick_chiplets_range), -2)
         ebrick_chiplets_licensing = round(np.random.uniform(*ebrick_chiplets_licensing_range), -2)
-       osat = round(np.random.uniform(*osat_range), -2)
+        osat = round(np.random.uniform(*osat_range), -2)
         vv_tests = round(np.random.uniform(*vv_tests_range), -2)
         cost_before_profit = round((overhead + cots_chips + custom_chips + custom_chips_nre +
                               custom_chips_licensing + ebrick_chiplets + ebrick_chiplets_licensing +
