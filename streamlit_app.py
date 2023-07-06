@@ -60,13 +60,9 @@ def simulate(num_simulations, overhead_range, cots_chips_range, custom_chips_ran
 
     df = pd.DataFrame(simulation_data)
     return df
-    
+
 def reset_data():
     # Reset all the inputs and the dataframe
-    global num_simulations, num_bins, overhead_range, cots_chips_range, custom_chips_range, custom_chips_nre_range
-    global custom_chips_licensing_range, ebrick_chiplets_range, ebrick_chiplets_licensing_range, osat_range
-    global vv_tests_range, profit_margin_range, df
-
     num_simulations = 10000
     num_bins = 50
     overhead_range = (2000, 200000)
@@ -85,30 +81,37 @@ def reset_data():
 if st.button('Reset'):
     reset_data()
 
+# Check if the Run Simulation button is clicked
 if run_simulation:
+    # Perform the simulations
     df = simulate(num_simulations, overhead_range, cots_chips_range, custom_chips_range, custom_chips_nre_range, custom_chips_licensing_range, ebrick_chiplets_range, ebrick_chiplets_licensing_range, osat_range, vv_tests_range, profit_margin_range)
 
-# Plot the histogram of total costs
-st.subheader('Histogram of Total Costs')
-fig = px.histogram(df, x='Total Cost', nbins=num_bins, marginal='box')
-st.plotly_chart(fig)
+    # Data Summary
+    st.subheader('Data Summary')
+    cost_summary = df['Total Cost'].describe()
+    st.write(cost_summary)
 
-# Identify the largest cost drivers
-st.subheader('Largest Cost Drivers')
-cost_drivers = df.drop(columns='Total Cost').mean().sort_values(ascending=False)
-st.write(cost_drivers)
+    # Box Plot of Total Cost
+    st.subheader('Box Plot of Total Cost')
+    fig_boxplot = px.box(df, y='Total Cost')
+    st.plotly_chart(fig_boxplot)
 
-# Identify the ideal value range for each variable to bring the average total cost below $5M
-st.subheader('Ideal Value Range for Each Variable')
-for column in df.columns:
-    if column != 'Total Cost':
-        ideal_range = df[df['Total Cost'] < 5e6][column].agg(['min', 'max'])
-        st.write(f'{column}: {ideal_range[0]} - {ideal_range[1]}')
+    # Correlation Heatmap
+    st.subheader('Correlation Heatmap')
+    correlation_matrix = df.drop(columns=['Profit', 'Total Cost']).corr()
+    fig_heatmap = px.imshow(correlation_matrix)
+    st.plotly_chart(fig_heatmap)
 
-# Identify the profit margin needed to keep the average total cost below $5M
-st.subheader('Profit Margin Needed')
-profit_margin_needed = round(df[df['Total Cost'] < 5e6]['Profit'].mean() / df[df['Total Cost'] < 5e6].drop(columns='Profit').sum(axis=1).mean(), 2)
-st.write(f'Profit margin needed to keep the average total cost below $5M: {profit_margin_needed * 100}%')
+    # Pairwise Scatter Plot
+    st.subheader('Pairwise Scatter Plot')
+    fig_scatter = px.scatter_matrix(df, dimensions=df.columns[:-2])
+    st.plotly_chart(fig_scatter)
+
+    # Data Filtering
+    st.subheader('Data Filtering')
+    profit_margin_filter = st.slider('Filter by Profit Margin', min_value=0.0, max_value=1.0, value=0.5, step=0.01)
+    filtered_df = df[df['Profit'] / df['Total Cost'] >= profit_margin_filter]
+    st.write(filtered_df)
 
 # Downloadable results
 if st.button('Download Results as CSV'):
