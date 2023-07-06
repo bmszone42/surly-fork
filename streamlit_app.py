@@ -115,6 +115,28 @@ def plot_boxplot(df):
     fig = px.box(df, y=var)
     st.plotly_chart(fig)
 
+def plot_correlation_heatmap(df):
+    st.sidebar.header('Correlation Heatmap')
+    if st.sidebar.button('Generate Correlation Heatmap'):
+        corr = df.corr()
+        fig, ax = plt.subplots(figsize=(10, 8))
+        sns.heatmap(corr, annot=True, ax=ax, cmap='coolwarm')
+        st.pyplot(fig)
+
+def plot_pair_plot(df):
+    st.sidebar.header('Pair Plot')
+    if st.sidebar.button('Generate Pair Plot'):
+        fig = sns.pairplot(df)
+        st.pyplot(fig)
+
+def plot_violin(df):
+    st.sidebar.header('Violin Plot')
+    var = st.sidebar.selectbox('Variable for violin plot', df.columns)
+    if st.sidebar.button('Generate Violin Plot'):
+        fig, ax = plt.subplots(figsize=(9, 6))
+        sns.violinplot(y=df[var], ax=ax)
+        st.pyplot(fig)
+
 
 def download_results(df):
     # Downloadable results
