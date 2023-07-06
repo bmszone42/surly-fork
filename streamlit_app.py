@@ -76,7 +76,7 @@ def reset_data():
     custom_chips_licensing_range = (0, 1000000)
     ebrick_chiplets_range = (20, 150)
     ebrick_chiplets_licensing_range = (0, 1000000)
-osat_range = (500000, 750000)
+    osat_range = (500000, 750000)
     vv_tests_range = (500000, 750000)
     profit_margin_range = (20, 30)
     df = pd.DataFrame()
