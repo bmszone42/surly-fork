@@ -21,26 +21,27 @@ osat_range = st.sidebar.slider('OSAT Range ($)', min_value=500000, max_value=750
 vv_tests_range = st.sidebar.slider('V&V Tests Range ($)', min_value=500000, max_value=750000, value=(500000, 750000))
 profit_margin_range = st.sidebar.slider('Profit Margin Range (%)', min_value=20, max_value=30, value=(20, 30))
 
+# Perform the simulations
 @st.cache
 def simulate(num_simulations, overhead_range, cots_chips_range, custom_chips_range, custom_chips_nre_range, custom_chips_licensing_range, ebrick_chiplets_range, ebrick_chiplets_licensing_range, osat_range, vv_tests_range, profit_margin_range):
-    simulation_data = []
+    df = pd.DataFrame()
     for _ in range(num_simulations):
-        overhead = np.random.uniform(*overhead_range)
-        cots_chips = np.random.randint(1, 6) * np.random.uniform(*cots_chips_range)
-        custom_chips = np.random.randint(0, 3) * np.random.uniform(*custom_chips_range)
-        custom_chips_nre = np.random.uniform(*custom_chips_nre_range)
-        custom_chips_licensing = np.random.uniform(*custom_chips_licensing_range)
-        ebrick_chiplets = np.random.choice(np.arange(16, 257, 16)) * np.random.uniform(*ebrick_chiplets_range)
-        ebrick_chiplets_licensing = np.random.uniform(*ebrick_chiplets_licensing_range)
-        osat = np.random.uniform(*osat_range)
-        vv_tests = np.random.uniform(*vv_tests_range)
-        cost_before_profit = (overhead + cots_chips + custom_chips + custom_chips_nre +
+        overhead = round(np.random.uniform(*overhead_range), -2)
+        cots_chips = round(np.random.randint(1, 6) * np.random.uniform(*cots_chips_range), -2)
+        custom_chips = round(np.random.randint(0, 3) * np.random.uniform(*custom_chips_range), -2)
+        custom_chips_nre = round(np.random.uniform(*custom_chips_nre_range), -2)
+        custom_chips_licensing = round(np.random.uniform(*custom_chips_licensing_range), -2)
+        ebrick_chiplets = round(np.random.choice(np.arange(16, 257, 16)) * np.random.uniform(*ebrick_chiplets_range), -2)
+        ebrick_chiplets_licensing = round(np.random.uniform(*ebrick_chiplets_licensing_range), -2)
+       osat = round(np.random.uniform(*osat_range), -2)
+        vv_tests = round(np.random.uniform(*vv_tests_range), -2)
+        cost_before_profit = round((overhead + cots_chips + custom_chips + custom_chips_nre +
                               custom_chips_licensing + ebrick_chiplets + ebrick_chiplets_licensing +
-                              osat + vv_tests)
-        profit = np.random.uniform(profit_margin_range[0]/100, profit_margin_range[1]/100) * cost_before_profit
-        total_cost = cost_before_profit + profit
+                              osat +vv_tests), -2)
+        profit = round(np.random.uniform(profit_margin_range[0]/100, profit_margin_range[1]/100) * cost_before_profit, -2)
+        total_cost = round(cost_before_profit + profit, -2)
 
-        simulation_data.append({
+        df = df.append({
             'Overhead': overhead,
             'COTS Chips': cots_chips,
             'Custom Chips': custom_chips,
@@ -52,9 +53,7 @@ def simulate(num_simulations, overhead_range, cots_chips_range, custom_chips_ran
             'V&V Tests': vv_tests,
             'Profit': profit,
             'Total Cost': total_cost
-        })
-
-    df = pd.DataFrame(simulation_data)
+        }, ignore_index=True)
     return df
 
 df = simulate(num_simulations, overhead_range, cots_chips_range, custom_chips_range, custom_chips_nre_range, custom_chips_licensing_range, ebrick_chiplets_range, ebrick_chiplets_licensing_range, osat_range, vv_tests_range, profit_margin_range)
