@@ -39,7 +39,7 @@ def get_scenario_parameters():
 
     return overhead_range1, cots_chips_range1, overhead_range2, cots_chips_range2
 
-@st.cache
+@st.cache_data
 def simulate(num_simulations, overhead_range, cots_chips_range, custom_chips_range, custom_chips_nre_range, custom_chips_licensing_range, ebrick_chiplets_range, ebrick_chiplets_licensing_range, osat_range, vv_tests_range, profit_margin_range):
     data = []
     for _ in range(num_simulations):
