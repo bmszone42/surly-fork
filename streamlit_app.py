@@ -79,7 +79,7 @@ for column in df.columns:
 
 # Identify the profit margin needed to keep the average total cost below $5M
 st.subheader('Profit Margin Needed')
-profit_margin_needed = df[df['Total Cost'] < 5e6]['Profit'].mean() / df[df['Total Cost'] < 5e6].drop(columns='Profit').sum(axis=1).mean()
+profit_margin_needed = round(df[df['Total Cost'] < 5e6]['Profit'].mean() / df[df['Total Cost'] < 5e6].drop(columns='Profit').sum(axis=1).mean(), 2)
 st.write(f'Profit margin needed to keep the average total cost below $5M: {profit_margin_needed * 100}%')
 
 # Downloadable results
