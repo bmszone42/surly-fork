@@ -57,6 +57,25 @@ def simulate(num_simulations, overhead_range, cots_chips_range, custom_chips_ran
 
     df = pd.DataFrame(simulation_data)
     return df
+    
+def reset_data():
+    # Reset all the inputs and the dataframe
+    num_simulations = 10000
+    overhead_range = (2000, 200000)
+    cots_chips_range = (1000, 10000)
+    custom_chips_range = (1000, 10000)
+    custom_chips_nre_range = (1000000, 10000000)
+    custom_chips_licensing_range = (0, 1000000)
+    ebrick_chiplets_range = (20, 150)
+    ebrick_chiplets_licensing_range = (0, 1000000)
+    osat_range = (500000, 750000)
+    vv_tests_range = (500000, 750000)
+    profit_margin_range = (20, 30)
+    df = pd.DataFrame()
+
+# Check if the Reset button is clicked
+if st.button('Reset'):
+    reset_data()
 
 df = simulate(num_simulations, overhead_range, cots_chips_range, custom_chips_range, custom_chips_nre_range, custom_chips_licensing_range, ebrick_chiplets_range, ebrick_chiplets_licensing_range, osat_range, vv_tests_range, profit_margin_range)
 
