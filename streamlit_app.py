@@ -22,6 +22,8 @@ osat_range = st.sidebar.slider('OSAT Range ($)', min_value=500000, max_value=750
 vv_tests_range = st.sidebar.slider('V&V Tests Range ($)', min_value=500000, max_value=750000, value=(500000, 750000))
 profit_margin_range = st.sidebar.slider('Profit Margin Range (%)', min_value=20, max_value=30, value=(20, 30))
 
+run_simulation = st.button('Run Simulation')
+
 # Perform the simulations
 @st.cache
 def simulate(num_simulations, overhead_range, cots_chips_range, custom_chips_range, custom_chips_nre_range, custom_chips_licensing_range, ebrick_chiplets_range, ebrick_chiplets_licensing_range, osat_range, vv_tests_range, profit_margin_range):
@@ -81,27 +83,33 @@ if st.button('Reset'):
 
 df = simulate(num_simulations, overhead_range, cots_chips_range, custom_chips_range, custom_chips_nre_range, custom_chips_licensing_range, ebrick_chiplets_range, ebrick_chiplets_licensing_range, osat_range, vv_tests_range, profit_margin_range)
 
-# Plot the histogram of total costs
-st.subheader('Histogram of Total Costs')
-fig = px.histogram(df, x='Total Cost', nbins=50, marginal='box')
-st.plotly_chart(fig)
 
-# Identify the largest cost drivers
-st.subheader('Largest Cost Drivers')
-cost_drivers = df.drop(columns='Total Cost').mean().sort_values(ascending=False)
-st.write(cost_drivers)
+# Check if the Run Simulation button is clicked
+if run_simulation:
+    # Perform the simulations
+    df = simulate(num_simulations, overhead_range, cots_chips_range, custom_chips_range, custom_chips_nre_range, custom_chips_licensing_range, ebrick_chiplets_range, ebrick_chiplets_licensing_range, osat_range, vv_tests_range, profit_margin_range)
 
-# Identify the ideal value range for each variable to bring the average total cost below $5M
-st.subheader('Ideal Value Range for Each Variable')
-for column in df.columns:
-    if column != 'Total Cost':
-        ideal_range = df[df['Total Cost'] < 5e6][column].agg(['min', 'max'])
-        st.write(f'{column}: {ideal_range[0]} - {ideal_range[1]}')
+    # Plot the histogram of total costs
+    st.subheader('Histogram of Total Costs')
+    fig = px.histogram(df, x='Total Cost', nbins=num_bins, marginal='box')
+    st.plotly_chart(fig)
 
-# Identify the profit margin needed to keep the average total cost below $5M
-st.subheader('Profit Margin Needed')
-profit_margin_needed = round(df[df['Total Cost'] < 5e6]['Profit'].mean() / df[df['Total Cost'] < 5e6].drop(columns='Profit').sum(axis=1).mean(), 2)
-st.write(f'Profit margin needed to keep the average total cost below $5M: {profit_margin_needed * 100}%')
+    # Identify the largest cost drivers
+    st.subheader('Largest Cost Drivers')
+    cost_drivers = df.drop(columns='Total Cost').mean().sort_values(ascending=False)
+    st.write(cost_drivers)
+
+    # Identify the ideal value range for each variable to bring the average total cost below $5M
+    st.subheader('Ideal Value Range for Each Variable')
+    for column in df.columns:
+        if column != 'Total Cost':
+            ideal_range = df[df['Total Cost'] < 5e6][column].agg(['min', 'max'])
+            st.write(f'{column}: {ideal_range[0]} - {ideal_range[1]}')
+
+    # Identify the profit margin needed to keep the average total cost below $5M
+    st.subheader('Profit Margin Needed')
+    profit_margin_needed = round(df[df['Total Cost'] < 5e6]['Profit'].mean() / df[df['Total Cost'] < 5e6].drop(columns='Profit').sum(axis=1).mean(), 2)
+    st.write(f'Profit margin needed to keep the average total cost below $5M: {profit_margin_needed * 100}%')
 
 # Downloadable results
 if st.button('Download Results as CSV'):
