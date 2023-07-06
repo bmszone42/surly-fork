@@ -1,47 +1,30 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 import plotly.express as px
 import base64
-import scipy.stats as stats
-import time
-import seaborn as sns
-import matplotlib.pyplot as plt
 
-def get_input_parameters():
-    # Sidebar inputs
-    num_simulations = st.sidebar.number_input('Number of Simulations', min_value=1000, max_value=100000, value=10000)
+# Sidebar inputs
+num_simulations = st.sidebar.number_input('Number of Simulations', min_value=1000, max_value=100000, value=10000)
 
-    # User input for cost ranges
-    st.sidebar.header('Cost Ranges')
-    overhead_range = st.sidebar.slider('Overhead Range ($)', min_value=2000, max_value=200000, value=(2000, 200000))
-    cots_chips_range = st.sidebar.slider('COTS Chips Range ($)', min_value=1000, max_value=10000, value=(1000, 10000))
-    custom_chips_range = st.sidebar.slider('Custom Chips Range ($)', min_value=1000, max_value=10000, value=(1000, 10000))
-    custom_chips_nre_range = st.sidebar.slider('Custom Chips NRE Range ($)', min_value=1000000, max_value=10000000, value=(1000000, 10000000))
-    custom_chips_licensing_range = st.sidebar.slider('Custom Chips Licensing Range ($)', min_value=0, max_value=1000000, value=(0, 1000000))
-    ebrick_chiplets_range = st.sidebar.slider('eBrick Chiplets Range ($)', min_value=20, max_value=150, value=(20, 150))
-    ebrick_chiplets_licensing_range = st.sidebar.slider('eBrick Chiplets Licensing Range ($)', min_value=0, max_value=1000000, value=(0, 1000000))
-    osat_range = st.sidebar.slider('OSAT Range ($)', min_value=500000, max_value=750000, value=(500000, 750000))
-    vv_tests_range = st.sidebar.slider('V&V Tests Range ($)', min_value=500000, max_value=750000, value=(500000, 750000))
-    profit_margin_range = st.sidebar.slider('Profit Margin Range (%)', min_value=20, max_value=30, value=(20, 30))
+# User input for cost ranges
+overhead_range = st.sidebar.slider('Overhead Range ($)', min_value=2000, max_value=200000, value=(2000, 200000))
+cots_chips_range = st.sidebar.slider('COTS Chips Range ($)', min_value=1000, max_value=10000, value=(1000, 10000))
+custom_chips_range = st.sidebar.slider('Custom Chips Range ($)', min_value=1000, max_value=10000, value=(1000, 10000))
+custom_chips_nre_range = st.sidebar.slider('Custom Chips NRE Range ($)', min_value=1000000, max_value=10000000, value=(1000000, 10000000))
+custom_chips_licensing_range = st.sidebar.slider('Custom Chips Licensing Range ($)', min_value=0, max_value=1000000, value=(0, 1000000))
+ebrick_chiplets_range = st.sidebar.slider('eBrick Chiplets Range ($)', min_value=20, max_value=150, value=(20, 150))
+ebrick_chiplets_licensing_range = st.sidebar.slider('eBrick Chiplets Licensing Range ($)', min_value=0, max_value=1000000, value=(0, 1000000))
+osat_range = st.sidebar.slider('OSAT Range ($)', min_value=500000, max_value=750000, value=(500000, 750000))
+vv_tests_range = st.sidebar.slider('V&V Tests Range ($)', min_value=500000, max_value=750000, value=(500000, 750000))
+profit_margin_range = st.sidebar.slider('Profit Margin Range (%)', min_value=20, max_value=30, value=(20, 30))
 
-    return num_simulations, overhead_range, cots_chips_range, custom_chips_range, custom_chips_nre_range, custom_chips_licensing_range, ebrick_chiplets_range, ebrick_chiplets_licensing_range, osat_range, vv_tests_range, profit_margin_range
-
-def get_scenario_parameters():
-    # User defines two scenarios
-    st.sidebar.header('Scenario 1')
-    overhead_range1 = st.sidebar.slider('Overhead Range 1 ($)', min_value=2000, max_value=200000, value=(2000, 200000))
-    cots_chips_range1 = st.sidebar.slider('COTS Chips Range 1 ($)', min_value=1000, max_value=10000, value=(1000, 10000))
-
-    st.sidebar.header('Scenario 2')
-    overhead_range2 = st.sidebar.slider('Overhead Range 2 ($)', min_value=2000, max_value=200000, value=(2000, 200000))
-    cots_chips_range2 = st.sidebar.slider('COTS Chips Range 2 ($)', min_value=1000, max_value=10000, value=(1000, 10000))
-
-    return overhead_range1, cots_chips_range1, overhead_range2, cots_chips_range2
-
-@st.cache_data
+# Perform the simulations
+@st.cache
 def simulate(num_simulations, overhead_range, cots_chips_range, custom_chips_range, custom_chips_nre_range, custom_chips_licensing_range, ebrick_chiplets_range, ebrick_chiplets_licensing_range, osat_range, vv_tests_range, profit_margin_range):
-    data = []
+    df = pd.DataFrame()
     for _ in range(num_simulations):
         overhead = np.random.uniform(*overhead_range)
         cots_chips = np.random.randint(1, 6) * np.random.uniform(*cots_chips_range)
@@ -54,11 +37,11 @@ def simulate(num_simulations, overhead_range, cots_chips_range, custom_chips_ran
         vv_tests = np.random.uniform(*vv_tests_range)
         cost_before_profit = (overhead + cots_chips + custom_chips + custom_chips_nre +
                               custom_chips_licensing + ebrick_chiplets + ebrick_chiplets_licensing +
-                              osat + vv_tests)
+                              osat +vv_tests)
         profit = np.random.uniform(profit_margin_range[0]/100, profit_margin_range[1]/100) * cost_before_profit
         total_cost = cost_before_profit + profit
 
-        data.append({
+        df = df.append({
             'Overhead': overhead,
             'COTS Chips': cots_chips,
             'Custom Chips': custom_chips,
@@ -70,115 +53,36 @@ def simulate(num_simulations, overhead_range, cots_chips_range, custom_chips_ran
             'V&V Tests': vv_tests,
             'Profit': profit,
             'Total Cost': total_cost
-        })
-    df = pd.DataFrame(data)
+        }, ignore_index=True)
     return df
 
-def compare_scenarios(df1, df2):
-    # Compare results
-    st.header('Scenario Comparison')
-    st.write(f'Mean total cost for scenario 1: {df1["Total Cost"].mean()}')
-    st.write(f'Mean total cost for scenario 2: {df2["Total Cost"].mean()}')
+df = simulate(num_simulations, overhead_range, cots_chips_range, custom_chips_range, custom_chips_nre_range, custom_chips_licensing_range, ebrick_chiplets_range, ebrick_chiplets_licensing_range, osat_range, vv_tests_range, profit_margin_range)
 
-    # Calculate 95% confidence interval for mean total cost
-    mean1 = df1['Total Cost'].mean()
-    std_err1 = df1['Total Cost'].sem()
-    ci1 = stats.t.interval(0.95, df1.shape[0]-1, loc=mean1, scale=std_err1)
+# Plot the histogram of total costs
+st.subheader('Histogram of Total Costs')
+fig = px.histogram(df, x='Total Cost', nbins=50, marginal='box')
+st.plotly_chart(fig)
 
-    mean2 = df2['Total Cost'].mean()
-    std_err2 = df2['Total Cost'].sem()
-    ci2 = stats.t.interval(0.95, df2.shape[0]-1, loc=mean2, scale=std_err2)
+# Identify the largest cost drivers
+st.subheader('Largest Cost Drivers')
+cost_drivers = df.drop(columns='Total Cost').mean().sort_values(ascending=False)
+st.write(cost_drivers)
 
-    st.write(f'95% confidence interval for mean total cost in scenario 1: {ci1}')
-    st.write(f'95% confidence interval for mean total cost in scenario 2: {ci2}')
+# Identify the ideal value range for each variable to bring the average total cost below $5M
+st.subheader('Ideal Value Range for Each Variable')
+for column in df.columns:
+    if column != 'Total Cost':
+        ideal_range = df[df['Total Cost'] < 5e6][column].agg(['min', 'max'])
+        st.write(f'{column}: {ideal_range[0]} - {ideal_range[1]}')
 
-def plot_scatter(df):
-    # User selects two variables
-    var1 = st.sidebar.selectbox('Variable 1', df.columns)
-    var2 = st.sidebar.selectbox('Variable 2', df.columns)
+# Identify the profit margin needed to keep the average total cost below $5M
+st.subheader('Profit Margin Needed')
+profit_margin_needed = df[df['Total Cost'] < 5e6]['Profit'].mean() / df[df['Total Cost'] < 5e6].drop(columns='Profit').sum(axis=1).mean()
+st.write(f'Profit margin needed to keep the average total cost below $5M: {profit_margin_needed * 100}%')
 
-    # Plot scatter plot of the two variables
-    fig = px.scatter(df, x=var1, y=var2)
-    st.plotly_chart(fig)
-
-def plot_histogram(df):
-    # User selects a variable
-    var = st.sidebar.selectbox('Variable for histogram', df.columns)
-    # Plot histogram of the selected variable
-    fig = px.histogram(df, x=var)
-    st.plotly_chart(fig)
-
-def plot_boxplot(df):
-    # User selects a variable
-    var = st.sidebar.selectbox('Variable for boxplot', df.columns)
-    # Plot boxplot of the selected variable
-    fig = px.box(df, y=var)
-    st.plotly_chart(fig)
-
-def plot_correlation_heatmap(df):
-    st.sidebar.header('Correlation Heatmap')
-    if st.sidebar.button('Generate Correlation Heatmap'):
-        corr = df.corr()
-        fig, ax = plt.subplots(figsize=(10, 8))
-        sns.heatmap(corr, annot=True, ax=ax, cmap='coolwarm')
-        st.pyplot(fig)
-
-def plot_pair_plot(df):
-    st.sidebar.header('Pair Plot')
-    if st.sidebar.button('Generate Pair Plot'):
-        fig = sns.pairplot(df)
-        st.pyplot(fig)
-
-def plot_violin(df):
-    st.sidebar.header('Violin Plot')
-    var = st.sidebar.selectbox('Variable for violin plot', df.columns)
-    if st.sidebar.button('Generate Violin Plot'):
-        fig, ax = plt.subplots(figsize=(9, 6))
-        sns.violinplot(y=df[var], ax=ax)
-        st.pyplot(fig)
-
-
-def download_results(df):
-    # Downloadable results
-    if st.button('Download Results as CSV'):
-        csv = df.to_csv(index=False)
-        b64 = base64.b64encode(csv.encode()).decode()  # some strings <-> bytes conversions necessary here
-        href = f'<a href="data:file/csv;base64,{b64}" download="simulation_results.csv">Download CSV File</a>'
-        st.markdown(href, unsafe_allow_html=True)
-
-def main():
-    num_simulations, overhead_range, cots_chips_range, custom_chips_range, custom_chips_nre_range, custom_chips_licensing_range, ebrick_chiplets_range, ebrick_chiplets_licensing_range, osat_range, vv_tests_range, profit_margin_range = get_input_parameters()
-    overhead_range1, cots_chips_range1, overhead_range2, cots_chips_range2 = get_scenario_parameters()
-
-    if st.button('Run Simulation'):
-        start_time = time.time()
-        # Run simulation for each scenario
-        df1 = simulate(num_simulations, overhead_range1, cots_chips_range1, custom_chips_range, custom_chips_nre_range, custom_chips_licensing_range, ebrick_chiplets_range, ebrick_chiplets_licensing_range, osat_range, vv_tests_range, profit_margin_range)
-        df2 = simulate(num_simulations, overhead_range2, cots_chips_range2, custom_chips_range, custom_chips_nre_range, custom_chips_licensing_range, ebrick_chiplets_range, ebrick_chiplets_licensing_range, osat_range, vv_tests_range, profit_margin_range)
-        end_time = time.time()
-        st.write(f'Simulation run time: {end_time - start_time} seconds')
-
-        
-        # Display full dataframe
-        st.dataframe(df1)
-
-        # Scenario comparisons rounded to cents
-        mean_total_cost_1 = round(df1['Total Cost'].mean(), 2)
-        mean_total_cost_2 = round(df2['Total Cost'].mean(), 2)
-        st.write(f'Mean total cost for scenario 1: ${mean_total_cost_1}')
-        st.write(f'Mean total cost for scenario 2: ${mean_total_cost_2}')
-
-        compare_scenarios(df1, df2)
-        plot_scatter(df1)
-        plot_histogram(df1)
-        plot_boxplot(df1)
-        plot_correlation_heatmap(df1)
-        plot_pair_plot(df1)
-        plot_violin(df1)
-        download_results(df1)
-        
-    if st.button('Reset Simulation'):
-        st.experimental_rerun()
-
-if __name__ == "__main__":
-    main()
+# Downloadable results
+if st.button('Download Results as CSV'):
+    csv = df.to_csv(index=False)
+    b64 = base64.b64encode(csv.encode()).decode()  # some strings <-> bytes conversions necessary here
+    href = f'<a href="data:file/csv;base64,{b64}" download="simulation_results.csv">Download CSV File</a>'
+    st.markdown(href, unsafe_allow_html=True)
