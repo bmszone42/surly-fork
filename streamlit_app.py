@@ -5,6 +5,8 @@ import plotly.express as px
 import base64
 import scipy.stats as stats
 import time
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 def get_input_parameters():
     # Sidebar inputs
