@@ -39,7 +39,7 @@ def get_scenario_parameters():
 
 @st.cache
 def simulate(num_simulations, overhead_range, cots_chips_range, custom_chips_range, custom_chips_nre_range, custom_chips_licensing_range, ebrick_chiplets_range, ebrick_chiplets_licensing_range, osat_range, vv_tests_range, profit_margin_range):
-    df = pd.DataFrame()
+    data = []
     for _ in range(num_simulations):
         overhead = np.random.uniform(*overhead_range)
         cots_chips = np.random.randint(1, 6) * np.random.uniform(*cots_chips_range)
@@ -56,7 +56,7 @@ def simulate(num_simulations, overhead_range, cots_chips_range, custom_chips_ran
         profit = np.random.uniform(profit_margin_range[0]/100, profit_margin_range[1]/100) * cost_before_profit
         total_cost = cost_before_profit + profit
 
-        df = df.append({
+        data.append({
             'Overhead': overhead,
             'COTS Chips': cots_chips,
             'Custom Chips': custom_chips,
@@ -68,7 +68,8 @@ def simulate(num_simulations, overhead_range, cots_chips_range, custom_chips_ran
             'V&V Tests': vv_tests,
             'Profit': profit,
             'Total Cost': total_cost
-        }, ignore_index=True)
+        })
+    df = pd.DataFrame(data)
     return df
 
 def compare_scenarios(df1, df2):
