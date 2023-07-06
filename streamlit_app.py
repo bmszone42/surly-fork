@@ -99,6 +99,21 @@ def plot_scatter(df):
     fig = px.scatter(df, x=var1, y=var2)
     st.plotly_chart(fig)
 
+def plot_histogram(df):
+    # User selects a variable
+    var = st.sidebar.selectbox('Variable for histogram', df.columns)
+    # Plot histogram of the selected variable
+    fig = px.histogram(df, x=var)
+    st.plotly_chart(fig)
+
+def plot_boxplot(df):
+    # User selects a variable
+    var = st.sidebar.selectbox('Variable for boxplot', df.columns)
+    # Plot boxplot of the selected variable
+    fig = px.box(df, y=var)
+    st.plotly_chart(fig)
+
+
 def download_results(df):
     # Downloadable results
     if st.button('Download Results as CSV'):
@@ -121,6 +136,8 @@ def main():
 
         compare_scenarios(df1, df2)
         plot_scatter(df1)
+        plot_histogram(df1)
+        plot_boxplot(df1)
         download_results(df1)
 
     if st.button('Reset Simulation'):
